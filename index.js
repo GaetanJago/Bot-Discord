@@ -3,6 +3,7 @@ const client = new Discord.Client();
 const fs = require('fs');
 
 const token = require('./token')
+const users = require('./users')
 
 client.once('ready', () => {
 	console.log('Ready!');
@@ -14,22 +15,22 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
     // the rest of your code
     
+    const user = getUser(newState.id)
     
-    if(newState.id == '228494290811092992'){
+    if(user.jingle != null){
         const channel = client.channels.cache.get(newState.channelID)
         if(channel && newState.selfMute == false && newState.selfDeaf == false){
             channel.join().then(connection => {
-                // Yay, it worked!
-                console.log("Play jago jingle");
+
                 // Create a dispatcher
-                const dispatcher = connection.play('audios/jagooo.mp3', { volume: 0 });
+                const dispatcher = connection.play('audios/' + user.jingle, { volume: 0.5 });
 
                 dispatcher.on('start', () => {
-                    console.log('audio.mp3 is now playing!');
+                    console.log(user.jingle + ' is now playing!');
                 });
 
                 dispatcher.on('finish', () => {
-                    console.log('audio.mp3 has finished playing!');
+                    console.log(user.jingle + ' has finished playing!');
                     channel.leave()
                 });
 
@@ -47,5 +48,14 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
 })
 
+
+function getUser(id){
+    for(const user of users){
+        if(user.id == id){
+            return user;
+        }
+    }
+    return null
+}
 
 client.login(token.botToken);
